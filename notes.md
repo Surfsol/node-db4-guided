@@ -107,3 +107,105 @@ If we want that delete or update to cascade, in other words deleting a record al
     .onUpdate('CASCADE');
     .onDelete('CASCADE')
 })
+
+a good data model:
+- captures only information system needs
+- flexible
+- guarantee data integrity, without too much sacrifice
+- driven by way will use data
+
+components 
+-entities (nouns: zoo, animal, species), a resource --> tables
+- properties --> columns or fields
+- relationships --> Foreign Keys 
+
+workflow
+-identify entities
+-identify properties
+-identify relationships
+
+- every table must have a primary key
+        -more efficient to use #
+        - postgres: type:serial
+- work on 2 or 3 entities at a time
+
+zoos:
+id - serial
+name - varchar //optional unique
+address - could be null
+
+animals:
+id
+name
+species_id  - foregin key --> mark pointing to Species
+                - foregin key must be same type as primary key
+
+Relationships:
+- one to one
+- one to many - most common
+    - need foreign key
+    - foreign key always goes on many 
+- many to many
+
+with a many to many need a 3rd table
+zoo/animals
+two foreign keys 
+1. foreign key to zoo
+2. foreign key to animals
+
+3rd table could include other columns
+
+knex migrate:make bootstrap
+
+exports.up = function(knex){
+    return knex.schema.creatTable('species', tble =>{
+        // unsigned integer, cannot be negative
+        tbl.increments()  //type: integer
+
+        tbl.string('name').notNullable()
+    })
+    .createTable('animals', tbl => {
+        tbl.increments()
+
+        tbl.string('name', 255).notNullable()
+
+        //define out Foreign key
+        tbl
+            .integer('species_id')
+            .unsigned()
+            .references('id')
+            .inTable('species')
+            //cascading
+            .onDelete('RESTRICT') // about deleting the record from primary key table
+            .onUpdate('CASCADE')// about changing the value of the primary key
+    })
+}
+
+.createTable('zoo', tbl => {
+    tbl.increments()
+    tbl.string('Zoo_name', 64).notNullable()
+    tbl.string('address')
+})
+.createTable('animal_zoo', tbl => {
+    tbl.increments(),
+    tbl
+       .integer(zoo_id)
+       .unsigned()
+       .reference('id')
+       .inTable('zoos')
+       ..onDelete('RESTRICT')
+       .onUpdate('CASCADE')
+    
+    tbl
+       .integer(animal_id)
+       .unsigned()
+       .reference('id')
+       .inTable('animals')
+       ..onDelete('RESTRICT')
+       .onUpdate('CASCADE')
+})
+
+
+
+cascading - what to do with child of parent that is modified
+CASCADE // change value if primary key value changes
